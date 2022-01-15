@@ -64,9 +64,9 @@ export const createRoutes = (app, conn) => {
 
   app.route("/users").patch(function (req, res) {
     const db = conn.getDb();
-    const userQuery = { _id: req.body.id };
+    const userQuery = { _id: ObjectId(req.body._id) };
     const updates = {
-      $inc: {
+      $set: {
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         email: req.body.email,
@@ -79,11 +79,12 @@ export const createRoutes = (app, conn) => {
       updates,
       function (err, _result) {
         if (err) {
-          res
-            .status(400)
-            .send(`Error updating likes on listing with id ${userQuery.id}!`);
+          res.status(400).send(`Error updating user with id ${userQuery._id}!`);
         } else {
-          console.log("1 document updated");
+          console.log(_result);
+          res
+            .status(200)
+            .send(`Success updating user with id ${userQuery._id}!`);
         }
       }
     );
@@ -91,13 +92,13 @@ export const createRoutes = (app, conn) => {
 
   app.route("/users/:id").delete((req, res) => {
     const dbConnect = conn.getDb();
-    const userQuery = { _id: req.body.id };
+    const userQuery = { _id: ObjectId(req.params.id) };
 
     dbConnect.collection("users").deleteOne(userQuery, function (err, _result) {
       if (err) {
         res.status(400).send(`Error deleting user with id ${userQuery.id}!`);
       } else {
-        console.log("1 document deleted");
+        res.status(200).send(`Success deleting user with id ${userQuery.id}!`);
       }
     });
   });
