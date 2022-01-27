@@ -1,17 +1,59 @@
+import { ObjectId } from "mongodb";
+
 export const createRoutes = (app, conn) => {
   app.route("/usersQuizes").get(async function (_req, res) {
     const db = conn.getDb();
 
-    db.collection("usersQuizes")
-      .find({})
-      .limit(50)
-      .toArray(function (err, result) {
-        if (err) {
-          res.status(400).send("Error fetching usersQuizes!");
-        } else {
-          res.json(result);
-        }
+    const userQuizes = await db.collection("usersQuizes").find({}).toArray();
+    for (let userQuiz of userQuizes) {
+      const userQuery = { _id: new ObjectId(userQuiz["user"]) };
+      userQuiz["user"] = (
+        await db.collection("users").find(userQuery).limit(1).toArray()
+      )[0];
+
+      const quizQuery = { _id: new ObjectId(userQuiz["quiz"]) };
+      userQuiz["quiz"] = (
+        await db.collection("quizes").find(quizQuery).limit(1).toArray()
+      )[0];
+    }
+    res.json({ userQuizes: userQuizes });
+  });
+
+  app.route("/usersQuizes/:id").get(async function (req, res) {
+    const db = conn.getDb();
+
+    if (!ObjectId.isValid(req.params.id)) {
+      res.status(400).send("Error fetching user!");
+      return;
+    }
+
+    const userQuizQuery = { _id: new ObjectId(req.params.id) };
+
+    let userQuiz = await db
+      .collection("usersQuizes")
+      .find(userQuizQuery)
+      .limit(1)
+      .toArray();
+
+    userQuiz = userQuiz[0];
+
+    const userQuery = { _id: new ObjectId(userQuiz["user"]) };
+    userQuiz["user"] = (
+      await db.collection("users").find(userQuery).limit(1).toArray()
+    )[0];
+
+    const quizQuery = { _id: new ObjectId(userQuiz["quiz"]) };
+    userQuiz["quiz"] = (
+      await db.collection("quizes").find(quizQuery).limit(1).toArray()
+    )[0];
+
+    if (userQuiz) {
+      res.json({
+        userQuiz: userQuiz,
       });
+    } else {
+      res.status(400).send("Error fetching user!");
+    }
   });
 
   app.route("/usersQuizes").post((req, res) => {
@@ -36,7 +78,7 @@ export const createRoutes = (app, conn) => {
 
   app.route("/usersQuizes").patch(function (req, res) {
     const db = conn.getDb();
-    const usersQuizesQuery = { _id: req.body.id };
+    const usersQuizesQuery = { _id: ObjectId(req.body.id) };
     const updates = {
       $inc: {
         firstname: req.body.firstname,
@@ -63,9 +105,9 @@ export const createRoutes = (app, conn) => {
     );
   });
 
-  app.route("/users/:id").delete((req, res) => {
+  app.route("/usersQuizes/:id").delete((req, res) => {
     const dbConnect = conn.getDb();
-    const usersQuizesQuery = { id: req.body.id };
+    const usersQuizesQuery = { _id: ObjectId(req.params.id) };
 
     dbConnect
       .collection("usersQuizes")
@@ -75,7 +117,7 @@ export const createRoutes = (app, conn) => {
             .status(400)
             .send(`Error deleting listing with id ${usersQuizesQuery.id}!`);
         } else {
-          console.log("1 document deleted");
+          res.status(200).send("Succes delete");
         }
       });
   });

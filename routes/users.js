@@ -24,7 +24,9 @@ export const createRoutes = (app, conn) => {
       return;
     }
 
-    const userQuery = { _id: new ObjectId(req.params.id) };
+    const userQuery = {
+      _id: new ObjectId(req.params.id),
+    };
 
     let user = await db.collection("users").find(userQuery).limit(1).toArray();
 
