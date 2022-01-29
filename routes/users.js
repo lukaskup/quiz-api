@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { validateUser } from "../validation/functions.js";
 
 export const createRoutes = (app, conn) => {
   app.route("/users").get(async function (_req, res) {
@@ -29,16 +30,23 @@ export const createRoutes = (app, conn) => {
     };
 
     let user = await db.collection("users").find(userQuery).limit(1).toArray();
-
     user = user[0];
     if (user) {
-      const quizQuery = { user: user._id };
+      const userQuizes = (
+        await db.collection("usersQuizes").find().toArray()
+      ).filter((userQuiz) => user._id.equals(new ObjectId(userQuiz.user)));
 
-      const quizes = await db.collection("quizes").find(quizQuery).toArray();
-
+      for (const userQuiz of userQuizes) {
+        userQuiz.quiz = (
+          await db
+            .collection("quizes")
+            .find({ _id: new ObjectId(userQuiz.quiz) })
+            .toArray()
+        )[0];
+      }
       res.json({
         user: user,
-        quizes: quizes,
+        userQuizes: userQuizes,
       });
     } else {
       res.status(400).send("Error fetching user!");
@@ -46,6 +54,11 @@ export const createRoutes = (app, conn) => {
   });
 
   app.route("/users").post((req, res) => {
+    const errors = validateUser(req.body);
+
+    if (errors.length > 0) {
+      return res.status(400).json(errors);
+    }
     const db = conn.getDb();
     const user = {
       firstname: req.body.firstname,
@@ -65,6 +78,12 @@ export const createRoutes = (app, conn) => {
   });
 
   app.route("/users").patch(function (req, res) {
+    const errors = validateUser(req.body);
+
+    if (errors.length > 0) {
+      return res.status(400).json(errors);
+    }
+
     const db = conn.getDb();
     const userQuery = { _id: ObjectId(req.body._id) };
     const updates = {

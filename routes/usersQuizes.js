@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { validateUserQuiz } from "../validation/functions.js";
 
 export const createRoutes = (app, conn) => {
   app.route("/usersQuizes").get(async function (_req, res) {
@@ -57,6 +58,11 @@ export const createRoutes = (app, conn) => {
   });
 
   app.route("/usersQuizes").post((req, res) => {
+    const errors = validateUserQuiz(req.body);
+
+    if (errors.length > 0) {
+      return res.status(400).json(errors);
+    }
     const db = conn.getDb();
     const user = {
       submitted_at: req.body.submitted_at,
@@ -77,6 +83,11 @@ export const createRoutes = (app, conn) => {
   });
 
   app.route("/usersQuizes").patch(function (req, res) {
+    const errors = validateUserQuiz(req.body);
+
+    if (errors.length > 0) {
+      return res.status(400).json(errors);
+    }
     const db = conn.getDb();
     const usersQuizesQuery = { _id: ObjectId(req.body.id) };
     const updates = {

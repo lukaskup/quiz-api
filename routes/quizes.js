@@ -1,12 +1,12 @@
 import { ObjectId } from "mongodb";
+import { validateQuiz } from "../validation/functions.js";
 
 export const createRoutes = (app, conn) => {
   app.route("/quizes").get(async function (_req, res) {
     const db = conn.getDb();
 
     db.collection("quizes")
-      .find({})
-      .limit(50)
+      .find()
       .toArray(function (err, result) {
         if (err) {
           res.status(400).send("Error fetching quizes!");
@@ -29,12 +29,19 @@ export const createRoutes = (app, conn) => {
     let quiz = await db.collection("quizes").find(quizQuery).limit(1).toArray();
     quiz = quiz[0];
     if (quiz) {
-      const userQuizQuery = { quiz: quiz._id };
+      const userQuizes = (
+        await db.collection("usersQuizes").find().toArray()
+      ).filter((userQuiz) => quiz._id.equals(new ObjectId(userQuiz.quiz)));
 
-      const userQuizes = await db
-        .collection("usersQuizes")
-        .find(userQuizQuery)
-        .toArray();
+      for (const userQuiz of userQuizes) {
+        userQuiz.user = (
+          await db
+
+            .collection("users")
+            .find({ _id: new ObjectId(userQuiz.user) })
+            .toArray()
+        )[0];
+      }
 
       res.json({
         quiz: quiz,
@@ -46,6 +53,10 @@ export const createRoutes = (app, conn) => {
   });
 
   app.route("/quizes").post((req, res) => {
+    const errors = validateQuiz(req.body);
+    if (errors.length > 0) {
+      return res.status(400).json(errors);
+    }
     const db = conn.getDb();
     const quiz = {
       name: req.body.name,
@@ -55,15 +66,21 @@ export const createRoutes = (app, conn) => {
 
     db.collection("quizes").insertOne(quiz, function (err, result) {
       if (err) {
-        res.status(400).send("Error inserting matches!");
+        return res.status(400).send("Error inserting matches!");
       } else {
         console.log(`Added a new match with id ${result.insertedId}`);
-        res.status(204).send();
+        return res.status(204).send();
       }
     });
   });
 
   app.route("/quizes").patch(function (req, res) {
+    const errors = validateQuiz(req.body);
+
+    if (errors.length > 0) {
+      return res.status(400).json(errors);
+    }
+
     const db = conn.getDb();
     const quizQuery = { _id: ObjectId(req.body._id) };
     const updates = {
