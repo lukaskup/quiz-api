@@ -91,11 +91,12 @@ export const createRoutes = (app, conn) => {
     const db = conn.getDb();
     const usersQuizesQuery = { _id: ObjectId(req.body.id) };
     const updates = {
-      $inc: {
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        email: req.body.email,
-        password: req.body.password,
+      $set: {
+        submitted_at: req.body.submitted_at,
+        rating: req.body.rating,
+        score: req.body.score,
+        user: req.body.user,
+        quiz: req.body.quiz,
       },
     };
 
@@ -110,7 +111,9 @@ export const createRoutes = (app, conn) => {
               `Error updating likes on listing with id ${usersQuizesQuery.id}!`
             );
         } else {
-          console.log("1 document updated");
+          res
+            .status(200)
+            .send(`Success updating user with id ${usersQuizesQuery._id}!`);
         }
       }
     );

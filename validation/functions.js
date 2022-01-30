@@ -1,9 +1,9 @@
 import { isRequired, minMax, checkEmail } from "./rules.js";
 
 const messagesQuiz = {
-  nameRequired: "please provide correct name",
-  nameMinMax: "name should have length between 3 and 20",
-  descriptionRequired: "please provide correct description",
+  nameRequired: "validationMessages.nameRequired",
+  nameMinMax: "validationMessages.nameMinMax",
+  descriptionRequired: "validationMessages.descriptionRequired",
 };
 
 export const validateQuiz = (values) => {
@@ -25,12 +25,12 @@ export const validateQuiz = (values) => {
 };
 
 const messagesUser = {
-  firstnameRequired: "please provide correct first name",
-  firstnameMinMax: "firstname should have length between 3 and 20",
-  lastnameRequired: "please provide correct lastname",
-  emailRequired: "please provide correct email",
-  passwordRequired: "please provide correct password",
-  passwordMinMax: "password should have length between 8 and 60",
+  firstnameRequired: "validationMessages.firstnameRequired",
+  firstnameMinMax: "validationMessages.firstnameMinMax",
+  lastnameRequired: "validationMessages.lastnameRequired",
+  emailRequired: "validationMessages.emailRequired",
+  passwordRequired: "validationMessages.passwordRequired",
+  passwordMinMax: "validationMessages.passwordMinMax",
 };
 
 export const validateUser = (values) => {
@@ -68,11 +68,11 @@ export const validateUser = (values) => {
 };
 
 const messagesUserQuiz = {
-  submittedAtRequired: "please provide submitted at",
-  userRequired: "pleasae select user",
-  quizRequired: "please select quiz",
-  scoreRequired: "score should be between 1 and 10",
-  ratingRequired: "rating should be between 1 and 10",
+  submittedAtRequired: "validationMessages.submittedAtRequired",
+  userRequired: "validationMessages.userRequired",
+  quizRequired: "validationMessages.quizRequired",
+  scoreRequired: "validationMessages.scoreRequired",
+  ratingRequired: "validationMessages.ratingRequired",
 };
 
 export const validateUserQuiz = (values) => {
@@ -85,11 +85,11 @@ export const validateUserQuiz = (values) => {
     errors.push(messagesUserQuiz.scoreRequired);
   }
   //quiz
-  if (!!!values.quiz?._id) {
+  if (!!!values.quiz) {
     errors.push(messagesUserQuiz.quizRequired);
   }
   //user
-  if (!!!values.user?._id) {
+  if (!!!values.user) {
     errors.push(messagesUserQuiz.userRequired);
   }
 
