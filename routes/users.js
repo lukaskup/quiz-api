@@ -102,7 +102,6 @@ export const createRoutes = (app, conn) => {
         if (err) {
           res.status(400).send(`Error updating user with id ${userQuery._id}!`);
         } else {
-          console.log(_result);
           res
             .status(200)
             .send(`Success updating user with id ${userQuery._id}!`);
@@ -115,11 +114,17 @@ export const createRoutes = (app, conn) => {
     const dbConnect = conn.getDb();
     const userQuery = { _id: ObjectId(req.params.id) };
 
-    dbConnect.collection("users").deleteOne(userQuery, function (err, _result) {
+    dbConnect.collection("users").deleteOne(userQuery, (err, _result) => {
       if (err) {
         res.status(400).send(`Error deleting user with id ${userQuery.id}!`);
       } else {
-        res.status(200).send(`Success deleting user with id ${userQuery.id}!`);
+        dbConnect
+          .collection("usersQuizes")
+          .deleteMany({ user: req.params.id }, (err, _result) => {
+            res
+              .status(200)
+              .send(`Success deleting user with id ${userQuery.id}!`);
+          });
       }
     });
   });

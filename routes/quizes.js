@@ -116,9 +116,13 @@ export const createRoutes = (app, conn) => {
         if (err) {
           res.status(400).send(`Error deleting quiz with id ${quizQuery.id}!`);
         } else {
-          res
-            .status(200)
-            .send(`Success deleting quiz with id ${quizQuery.id}!`);
+          dbConnect
+            .collection("usersQuizes")
+            .deleteMany({ quiz: req.params.id }, (err, _result) => {
+              res
+                .status(200)
+                .send(`Success deleting quiz with id ${quizQuery.id}!`);
+            });
         }
       });
   });

@@ -82,14 +82,15 @@ export const createRoutes = (app, conn) => {
     });
   });
 
-  app.route("/usersQuizes").patch(function (req, res) {
+  app.route("/usersQuizes").patch(async function (req, res) {
     const errors = validateUserQuiz(req.body);
 
     if (errors.length > 0) {
       return res.status(400).json(errors);
     }
     const db = conn.getDb();
-    const usersQuizesQuery = { _id: ObjectId(req.body.id) };
+
+    const usersQuizesQuery = { _id: ObjectId(req.body._id) };
     const updates = {
       $set: {
         submitted_at: req.body.submitted_at,
