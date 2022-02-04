@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { validateQuiz } from "../validation/functions.js";
+import md5 from "md5";
 
 export const createRoutes = (app, conn) => {
   app.route("/quizes").get(async function (_req, res) {

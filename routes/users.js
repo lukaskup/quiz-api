@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
-import { validateUser } from "../validation/functions.js";
+import { validateLogin, validateUser } from "../validation/functions.js";
+import md5 from "md5";
 
 export const createRoutes = (app, conn) => {
   app.route("/users").get(async function (_req, res) {
@@ -53,6 +54,32 @@ export const createRoutes = (app, conn) => {
     }
   });
 
+  app.route("/users/login").post(async (req, res) => {
+    //mp3
+    const errors = validateLogin(req.body);
+
+    if (errors.length > 0) {
+      return res.status(400).json(errors);
+    }
+
+    const db = conn.getDb();
+    const userQuery = {
+      email: req.body.email,
+      password: md5(req.body.password),
+    };
+
+    const user = (
+      await db.collection("users").find(userQuery).limit(1).toArray()
+    )[0];
+
+    if (user) {
+      delete user.password;
+      res.status(200).json(user);
+    } else {
+      res.status(400).json(["validationMessages.loginFailed"]);
+    }
+  });
+
   app.route("/users").post((req, res) => {
     //mp3
     const errors = validateUser(req.body);
@@ -65,7 +92,8 @@ export const createRoutes = (app, conn) => {
       firstname: req.body.firstname,
       lastname: req.body.lastname,
       email: req.body.email,
-      password: req.body.password,
+      role: req.body.role,
+      password: md5(req.body.password),
     };
 
     db.collection("users").insertOne(user, function (err, result) {
@@ -92,7 +120,8 @@ export const createRoutes = (app, conn) => {
         firstname: req.body.firstname,
         lastname: req.body.lastname,
         email: req.body.email,
-        password: req.body.password,
+        role: req.body.role,
+        password: md5(req.body.password),
       },
     };
 

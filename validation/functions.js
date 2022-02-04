@@ -31,6 +31,26 @@ const messagesUser = {
   emailRequired: "validationMessages.emailRequired",
   passwordRequired: "validationMessages.passwordRequired",
   passwordMinMax: "validationMessages.passwordMinMax",
+  loginFailed: "validationMessages.loginFailed",
+};
+
+export const validateLogin = (values) => {
+  const errors = [];
+
+  //email
+  if (!isRequired(values.email)) {
+    errors.push(messagesUser.emailRequired);
+  }
+  if (!checkEmail(values.email)) {
+    errors.push(messagesUser.emailRequired);
+  }
+
+  //password
+  if (!isRequired(values.password)) {
+    errors.push(messagesUser.passwordRequired);
+  }
+
+  return errors;
 };
 
 export const validateUser = (values) => {
